@@ -1,0 +1,12 @@
+[*]
+end_of_line = crlf
+charset = utf-8
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.{js,ts,html,pug,sass,haml,scss,css,json,cshtml,yml,csproj}]
+indent_size = 2
+
+[*.{md,markdown}]
+trim_trailing_whitespace = false
