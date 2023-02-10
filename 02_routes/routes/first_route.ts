@@ -1,6 +1,8 @@
-import express, { Response, Router } from 'express';
+import { Response, Router } from 'express';
 
-const router: Router = express.Router();
+const router: Router = Router();
+
+export const firstRoutes = router;
 
 router.get('/first', (_, res: Response) => {
   res.status(200).json({
@@ -8,5 +10,3 @@ router.get('/first', (_, res: Response) => {
     message: 'First route message!'
   });
 });
-
-export const firstRoutes = router;
