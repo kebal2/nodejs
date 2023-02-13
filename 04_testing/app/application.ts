@@ -9,9 +9,9 @@ function loggerMiddleware(request: express.Request, response: express.Response, 
 
 
 export class Application implements IApplication {
-  private app: ea;
-  private defaultRoute: string;
-  private controllers: Array<any>;
+  private readonly app: ea;
+  private readonly defaultRoute: string;
+  private readonly controllers: Array<any>;
 
   constructor(controllers: Array<any>);
   constructor(controllers: Array<any>, defaultRoute: string);
