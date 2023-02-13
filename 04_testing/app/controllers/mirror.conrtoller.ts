@@ -8,11 +8,10 @@ export class MirrorController {
   }
 
   private intializeRoutes() {
-    this.router.get(this.rootPath, this.reflect);
     this.router.post(this.rootPath, this.reflect);
   }
 
-  private reflect = (request: express.Request, response: express.Response) => {
+  public reflect = (request: express.Request, response: express.Response) => {
     response.status(200).send(request.body);
   }
 

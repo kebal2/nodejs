@@ -10,6 +10,8 @@ import {
 
 import {MirrorController} from './mirror.conrtoller';
 import express, {Router} from "express";
+import {createMock} from "ts-auto-mock";
+import {method, On} from 'ts-auto-mock/extension';
 
 beforeEach(() => {
 
@@ -28,43 +30,27 @@ beforeAll(() => {
 })
 
 beforeEach(() => {
-  jest.mocked(Router).mockClear();
+
 });
-
-// jest.mock('express', () => {
-//   return {
-//     Router: jest.fn().mockImplementation(() => {
-//       return {
-//         post: jest.fn().mockImplementation((rootPath: string, method: (request: express.Request, response: express.Response) => {}) => { }),
-//         get: jest.fn().mockImplementation((rootPath: string, method: (request: express.Request, response: express.Response) => {}) => {}),
-//       };
-//     })
-//   };
-// });
-
-jest.mock('express', () => {
-  return {
-    Router: jest.fn().(() => {
-      return {
-        get: jest.fn(),
-      };
-    })
-  };
-});
-
 
 describe('Mirror Controller should return send data', () => {
 
-  const mockedRouter = jest.mocked(Router);
+  let mockRouter: express.Router;
+
+  beforeEach(() => {
+    mockRouter = createMock<express.Router>();
+  });
 
   test('reflect method should be POST', () => {
-    const mc = new MirrorController(mockedRouter.mock.instances[0]);
+    const mockGetMethod: jest.Mock = On(mockRouter).get(method(mock => mock.get));
+    const mockPostMethod: jest.Mock = On(mockRouter).get(method(mock => mock.post));
 
-    expect(mockedRouter.mock.calls.length).toBe(1);
+    const mc = new MirrorController(mockRouter);
 
-    console.log(mockedRouter.mock.results);
+    expect(mockGetMethod).toHaveBeenCalledTimes(0);
+    expect(mockPostMethod).toHaveBeenCalledTimes(1);
+    expect(mockPostMethod).toHaveBeenCalledWith("/mirror", mc.reflect);
 
-    // expect(mockedRouter.mock.results[0]).toBe(1);
   });
 
 });
