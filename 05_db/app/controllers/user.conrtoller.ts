@@ -2,13 +2,12 @@ import * as express from 'express';
 import {Router} from 'express';
 import {Controller} from "./controller";
 import {IApplicationConfiguration} from "../configuration";
-import {connect} from "mongoose";
-import {User} from "../../database/model/user";
+import {IUserRepository} from "../../database/repositories/i.user.repository";
 
 export class UserController extends Controller {
   static readonly version = 1;
 
-  constructor(private config: IApplicationConfiguration, private router: Router = express.Router()) {
+  constructor(private config: IApplicationConfiguration, private userRepo: IUserRepository, private router: Router = express.Router()) {
     super(UserController.version);
     this.intializeRoutes();
   }
@@ -20,9 +19,7 @@ export class UserController extends Controller {
 
   public users = async (request: express.Request, response: express.Response) => {
 
-    await connect(this.config.connectionString);
-
-    const users = await User.find({}).exec();
+    const users = await this.userRepo.users();
 
     response.status(200).send(users);
 
@@ -30,15 +27,18 @@ export class UserController extends Controller {
 
   public addUser = async (request: express.Request, response: express.Response) => {
 
-    await connect(this.config.connectionString, {});
+    try {
+      await this.userRepo.addUser(request.body);
 
-    const u = request.body as IUser;
-    const user = new User(u);
+      response.status(201).send({
+        success: true
+      });
 
-    await user.save();
+    } catch {
+      response.status(500).send({
+        success: false
+      });
 
-    response.status(201).send({
-      success: true
-    });
+    }
   }
 }

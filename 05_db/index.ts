@@ -4,6 +4,8 @@ import express from "express";
 import {IApplicationConfiguration} from "./app/configuration";
 import * as fs from "fs";
 import {UserController} from "./app/controllers/user.conrtoller";
+import {RepositroyFactory} from "./database/repositories/repositroy.factory";
+import {MongoUserRepository} from "./database/repositories/user.repository.mongo";
 
 function LoadConfig(): Promise<IApplicationConfiguration> {
 
@@ -14,8 +16,9 @@ function LoadConfig(): Promise<IApplicationConfiguration> {
 
     const port: number = +(process.env.PORT ?? 0);
     const dbconnectionstring: string = process.env.DB_CONNECTION_STRING ?? "";
+    const dbtype: string = process.env.DB_TYPE ?? "";
 
-    fs.readFile('./app.configuration.json', 'utf8', (err, data)  => {
+    fs.readFile('./app.configuration.json', 'utf8', (err, data) => {
       if (err) {
         console.error(err);
         reject();
@@ -23,9 +26,9 @@ function LoadConfig(): Promise<IApplicationConfiguration> {
       }
 
       const conf: IApplicationConfiguration = JSON.parse(data);
-      console.log(dbconnectionstring);
 
-      conf.connectionString = dbconnectionstring ? dbconnectionstring: conf.connectionString;
+      conf.connectionString = dbconnectionstring ? dbconnectionstring : conf.connectionString;
+      conf.dbtype = dbtype ? dbtype : conf.dbtype;
       conf.port = port > 0 ? port : conf.port;
 
       resolve(conf);
@@ -39,11 +42,11 @@ function LoadConfig(): Promise<IApplicationConfiguration> {
 LoadConfig().then((conf) => {
 
   const router = express.Router();
-
+  const f = new RepositroyFactory(conf);
   new Application(
     conf,
     [
-      new UserController(conf, router),
+      new UserController(conf, f.get(MongoUserRepository), router),
     ],
     '/api'
   ).Start();
