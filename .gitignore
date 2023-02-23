@@ -3,3 +3,4 @@ dist
 *.js
 .idea
 coverage
+test.mdb
