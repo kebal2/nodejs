@@ -3,6 +3,7 @@ import {Router} from 'express';
 import {Controller} from "./controller";
 import {IApplicationConfiguration} from "../configuration";
 import {IUserRepository} from "../../database/repositories/i.user.repository";
+import { IUser } from '../../database/document/i.user';
 
 export class UserController extends Controller {
   static readonly version = 1;
@@ -28,7 +29,8 @@ export class UserController extends Controller {
   public addUser = async (request: express.Request, response: express.Response) => {
 
     try {
-      await this.userRepo.addUser(request.body);
+      const u = JSON.parse(request.body) as IUser;
+      await this.userRepo.addUser(u);
 
       response.status(201).send({
         success: true

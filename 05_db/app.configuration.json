@@ -1,6 +1,6 @@
 {
   "port": 8004,
-  "dbtype": "mongo",
+  "dbtype": "sqlite",
   "connectionString":"mongodb://root:example@127.0.0.1:47017"
 
 }

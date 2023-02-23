@@ -1,16 +1,17 @@
-import {Application} from './app/application';
+import { Application } from './app/application';
 import dotenv from 'dotenv';
 import express from "express";
-import {IApplicationConfiguration} from "./app/configuration";
+import { IApplicationConfiguration } from "./app/configuration";
 import * as fs from "fs";
-import {UserController} from "./app/controllers/user.conrtoller";
-import {RepositroyFactory} from "./database/repositories/repositroy.factory";
-import {MongoUserRepository} from "./database/repositories/user.repository.mongo";
-import type {MongoDriver} from '@mikro-orm/mongodb';
-import type {MariaDbDriver} from '@mikro-orm/mariadb';
-import {MikroORM} from "@mikro-orm/core";
-import {EntityManager} from "@mikro-orm/core/EntityManager";
-
+import { UserController } from "./app/controllers/user.conrtoller";
+import type { MongoDriver } from '@mikro-orm/mongodb';
+import type { MariaDbDriver } from '@mikro-orm/mariadb';
+import { MikroORM } from "@mikro-orm/core";
+import { EntityManager } from "@mikro-orm/core/EntityManager";
+import { SqliteDriver } from '@mikro-orm/sqlite';
+import { SqliteUserRepository } from './database/repositories/user.repository.sqlite';
+import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import {updateSchema} from './database/schema.init';
 function LoadConfig(): Promise<IApplicationConfiguration> {
 
   dotenv.config();
@@ -46,45 +47,27 @@ function LoadConfig(): Promise<IApplicationConfiguration> {
 LoadConfig().then(async (conf) => {
 
   let em: EntityManager;
-  switch (conf.dbtype.toLowerCase()) {
-    case  'mongo': {
 
-      const orm = await MikroORM.init<MongoDriver>({
-        entities: ['./dist/entities'], // path to our JS entities (dist), relative to `baseDir`
-        entitiesTs: ['./src/entities'], // path to our TS entities (src), relative to `baseDir`
-        dbName: 'test',
-      });
+  let microOrmSettings: any = {
+    entities: ['./dist/database/model'], // path to our JS entities (dist), relative to `baseDir`
+    entitiesTs: ['./database/model'], // path to our TS entities (src), relative to `baseDir`
+    dbName: 'test.mdb',
+    type: conf.dbtype.toLowerCase(),
+    highlighter: new SqlHighlighter(),
+    debug: true,
+  };
+  
+  updateSchema(microOrmSettings);
 
-      em = orm.em;
-    }
-
-      break;
-    case 'MariaDb': {
-
-      const orm = await MikroORM.init<MariaDbDriver>({
-        entities: ['./dist/entities'], // path to our JS entities (dist), relative to `baseDir`
-        entitiesTs: ['./src/entities'], // path to our TS entities (src), relative to `baseDir`
-        dbName: 'test',
-      });
-
-      em = orm.em;
-    }
-
-      break;
-
-    default: throw Error("Unhandled db type [mongo, mariadb]");
-  }
-
-  console.log(em); // access EntityManager via `em` property
-
+  const orm = await MikroORM.init<SqliteDriver>(microOrmSettings);
   const router = express.Router();
-  const f = new RepositroyFactory(conf);
   new Application(
     conf,
     [
-      new UserController(conf, f.get(MongoUserRepository), router),
+      new UserController(conf, new SqliteUserRepository(orm), router),
     ],
     '/api'
   ).Start();
 
 });
+
