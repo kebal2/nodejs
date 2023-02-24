@@ -21,14 +21,15 @@ export async function updateSchema(microOrmSettings: any, clearDb: boolean = fal
   // const dropAndCreateDump = await generator.generate();
   // console.log(dropAndCreateDump);
 
+  if (clearDb)
+    await generator.clearDatabase(); // removes all data
+
   // or you can run those queries directly, but be sure to check them first!
   await generator.updateSchema();
 
   // in tests it can be handy to use those:
   // await generator.refreshDatabase(); // ensure db exists and is fresh
 
-  if (clearDb)
-    await generator.clearDatabase(); // removes all data
 
   if (recreateDb) {
     await generator.dropSchema();
