@@ -1,31 +1,41 @@
-import { MikroORM } from '@mikro-orm/core';
-import { SqlHighlighter } from '@mikro-orm/sql-highlighter';
+import {MikroORM} from '@mikro-orm/core';
 
-export async function updateSchema(microOrmSettings: any) {
+export async function updateSchema(microOrmSettings: any, clearDb: boolean = false, recreateDb: boolean = false) {
+
   const orm = await MikroORM.init(microOrmSettings);
+
   const generator = orm.getSchemaGenerator();
 
-  const dropDump = await generator.getDropSchemaSQL();
-  console.log(dropDump);
+  await generator.ensureDatabase();
 
-  const createDump = await generator.getCreateSchemaSQL();
-  console.log(createDump);
-
-  const updateDump = await generator.getUpdateSchemaSQL();
-  console.log(updateDump);
+  // const dropDump = await generator.getDropSchemaSQL();
+  // console.log(dropDump);
+  //
+  // const createDump = await generator.getCreateSchemaSQL();
+  // console.log(createDump);
+  //
+  // const updateDump = await generator.getUpdateSchemaSQL();
+  // console.log(updateDump);
 
   // there is also `generate()` method that returns drop + create queries
-  const dropAndCreateDump = await generator.generate();
-  console.log(dropAndCreateDump);
+  // const dropAndCreateDump = await generator.generate();
+  // console.log(dropAndCreateDump);
 
   // or you can run those queries directly, but be sure to check them first!
-  await generator.dropSchema();
-  await generator.createSchema();
   await generator.updateSchema();
-  
+
   // in tests it can be handy to use those:
-  await generator.refreshDatabase(); // ensure db exists and is fresh
-  await generator.clearDatabase(); // removes all data
+  // await generator.refreshDatabase(); // ensure db exists and is fresh
+
+  if (clearDb)
+    await generator.clearDatabase(); // removes all data
+
+  if (recreateDb) {
+    await generator.dropSchema();
+    await generator.createSchema();
+
+  }
+
 
   await orm.close(true);
 }
