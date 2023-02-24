@@ -1,27 +1,11 @@
-// import {IUser} from "../document/i.user";
-// import {connect} from "mongoose";
-// import {User} from "../model/user";
-// import {IUserRepository} from "./i.user.repository";
+import {UserRepository} from "./user.repository";
+import {MikroORM} from "@mikro-orm/core";
+import {MongoDriver} from "@mikro-orm/mongodb";
 
-// export class MongoUserRepository extends Repository implements IUserRepository {
+export class MongoUserRepository extends UserRepository<MongoDriver> {
 
-//   constructor(private connectionString: string) {
-//     super(connectionString);
-//   }
+  protected constructor(orm: MikroORM<MongoDriver>) {
+    super(orm);
+  }
 
-//   async addUser(user: IUser): Promise<void> {
-//     await connect(this.connectionString, {});
-
-//     const u = new User(user);
-
-//     await u.save();
-//   }
-
-//   async users(): Promise<IUser[]> {
-//     await connect(this.connectionString);
-
-//     const users = await User.find({}).exec();
-
-//     return users;
-//   }
-// }
+}
