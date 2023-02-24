@@ -4,8 +4,6 @@ import express from "express";
 import { IApplicationConfiguration } from "./app/configuration";
 import * as fs from "fs";
 import { UserController } from "./app/controllers/user.conrtoller";
-import type { MongoDriver } from '@mikro-orm/mongodb';
-import type { MariaDbDriver } from '@mikro-orm/mariadb';
 import { MikroORM } from "@mikro-orm/core";
 import { EntityManager } from "@mikro-orm/core/EntityManager";
 import { SqliteDriver } from '@mikro-orm/sqlite';
@@ -51,13 +49,13 @@ LoadConfig().then(async (conf) => {
   let microOrmSettings: any = {
     entities: ['./dist/database/model'], // path to our JS entities (dist), relative to `baseDir`
     entitiesTs: ['./database/model'], // path to our TS entities (src), relative to `baseDir`
-    dbName: 'test.mdb',
+    dbName: 'test.db',
     type: conf.dbtype.toLowerCase(),
     highlighter: new SqlHighlighter(),
     debug: true,
   };
-  
-  updateSchema(microOrmSettings);
+
+  await updateSchema(microOrmSettings);
 
   const orm = await MikroORM.init<SqliteDriver>(microOrmSettings);
   const router = express.Router();
