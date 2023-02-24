@@ -29,7 +29,7 @@ export class UserController extends Controller {
   public addUser = async (request: express.Request, response: express.Response) => {
 
     try {
-      const u = JSON.parse(request.body) as IUser;
+      const u = request.body as IUser;
       await this.userRepo.addUser(u);
 
       response.status(201).send({
