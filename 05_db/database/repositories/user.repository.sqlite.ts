@@ -1,4 +1,4 @@
-import { EntityManager, GetRepository, MikroORM } from "@mikro-orm/core";
+import { MikroORM } from "@mikro-orm/core";
 import { SqliteDriver } from "@mikro-orm/sqlite";
 import { IUser } from "../document/i.user";
 import { User } from "../model/user";
@@ -15,12 +15,12 @@ export class SqliteUserRepository implements IUserRepository {
   async addUser(user: IUser): Promise<void> {
 
     const u = new User();
-    
+
     u.name = user.name;
     u.email = user.email;
-    u.avatar = u.avatar;
+    u.avatar = user.avatar;
 
-    console.log(this.UserRepo.persistAndFlush(u));
+    await this.UserRepo.persistAndFlush(u);
 
   }
 
