@@ -1,17 +1,17 @@
 import crypto from "crypto";
 
-class CodeChallenge {
-  static instance = null;
+export class CodeChallenge {
+  private static instance: CodeChallenge | null = null;
 
-  static getInstance() {
+  static getInstance(): CodeChallenge {
     if (!CodeChallenge.instance) {
       CodeChallenge.instance = new CodeChallenge();
     }
     return CodeChallenge.instance;
   }
 
-  codeVerifier = null;
-  codeChallenge = null;
+  public verifier: string;
+  public challenge: string;
 
   constructor() {
     const length = 43;
@@ -24,11 +24,11 @@ class CodeChallenge {
       code.push(chars[bytes[i] % chars.length]);
     }
 
-    this.codeVerifier = code.join("");
-    this.codeChallenge = this.generateCodeChallenge(this.codeVerifier);
+    this.verifier = code.join("");
+    this.challenge = this.generateCodeChallenge(this.verifier);
   }
 
-  generateCodeChallenge(codeVerifier) {
+  private generateCodeChallenge(codeVerifier: string): string {
     const digest = crypto
       .createHash("sha256")
       .update(codeVerifier)
@@ -40,5 +40,3 @@ class CodeChallenge {
     return challenge;
   }
 }
-
-export default CodeChallenge.getInstance();

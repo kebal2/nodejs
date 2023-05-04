@@ -5,7 +5,7 @@ const configuration = {
   clients: [{
     client_id: 'CLIENT_ID',
     client_secret: 'CLIENT_SECRET',
-    redirect_uris: ['http://localhost:3001/callback'],
+    redirect_uris: ['http://localhost:8002/api/v1/callback'],
   }],
 };
 
