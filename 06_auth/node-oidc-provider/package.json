@@ -2,5 +2,8 @@
   "type": "module",
   "dependencies": {
     "oidc-provider": "^8.2.0"
+  },
+  "devDependencies": {
+    "@types/oidc-provider": "^8.2.0"
   }
 }

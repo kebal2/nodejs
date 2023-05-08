@@ -1,4 +1,4 @@
-import Provider from 'oidc-provider';
+import Provider from "oidc-provider"
 
 const configuration = {
   // refer to the documentation for other available configuration
