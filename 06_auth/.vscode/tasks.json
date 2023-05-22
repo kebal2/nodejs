@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "tasks": [
+    {
+      "label": "Copy .env to dist",
+      "type": "shell",
+      "command": "cp ${workspaceFolder}/.env ${workspaceFolder}/dist/.env"
+    },
+    {
+      "label": "tsc: build - tsconfig.json",
+      "type": "shell",
+      "command": "npx tsc -p tsconfig.json"
+    },
+    {
+      "label": "Pre-launch Tasks",
+      "type": "shell",
+      "dependsOn": ["Copy .env to dist", "tsc: build - tsconfig.json"],
+      "command": "echo Pre-launch tasks completed"
+    }
+  ]
+}

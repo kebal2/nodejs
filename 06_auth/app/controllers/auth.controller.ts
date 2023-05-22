@@ -2,6 +2,14 @@ import * as express from "express";
 import { EndpointNames } from "../helpers/endpoint-names";
 import { RouteHelper } from "../helpers/route-helper";
 import { URLSearchParamsHelper } from "../helpers/url-search-params-helper";
+import { clearSessionCookie, setSessionCookie } from "../auth/cookie";
+import { serialize } from "../auth/session";
+import {
+  deserializeAuthState,
+  getAuthStateCookie,
+  serializeAuthState,
+  setAuthStateCookie,
+} from "../auth/state";
 
 export class AuthController {
   public router = express.Router();
@@ -11,44 +19,48 @@ export class AuthController {
   }
 
   public intializeRoutes() {
-    this.router.get(EndpointNames.AUTHORIZE, this.authGet);
-    this.router.get(EndpointNames.CALLBACK, this.callbackGet);
+    this.router.get("/auth/login", this.loginGet);
+    this.router.get("/auth/teszt", this.teszt);
   }
 
-  authGet = (req: express.Request, res: express.Response) => {
-    const params = URLSearchParamsHelper.generateAuthorizeParams();
-
-    const authorizationUrl = `${RouteHelper.AUTH_ENDPOINT}?${params.toString()}`;
-
-    res.redirect(authorizationUrl);
+  teszt = (req: express.Request, res: express.Response) => {
+    console.log("teszteeed");
   };
 
-  callbackGet = async (req: express.Request, res: express.Response) => {
+  loginGet = (req: express.Request, res: express.Response) => {
+    const backToPath = (req.query.backTo as string) || "/private";
+    const state = serializeAuthState({ backToPath });
+
+    const authUrl = req.app.authClient!.authorizationUrl({
+      scope: "openid email profile",
+      state,
+    });
+
+    setAuthStateCookie(res, state);
+
+    res.redirect(authUrl);
+  };
+
+  logoutGet = async (req: express.Request, res: express.Response) => {
+    const client = req.app.authClient;
+    const tokenSet = req.session?.tokenSet;
+
     try {
-      const { code } = req.query;
-
-      if (!code) {
-        throw new Error("Code not found in request");
-      }
-
-      const params = URLSearchParamsHelper.generateCallbackParams(
-        code as string
-      );
-
-      const response = await fetch(RouteHelper.TOKEN_ENDPOINT, {
-        method: "POST",
-        body: params,
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
-      });
-
-      const token = await response.json();
-
-      res.json(token);
-    } catch (error) {
-      console.error(error);
-      res.status(500).send("Internal Server Error");
+      await client!.revoke(tokenSet!.access_token!);
+    } catch (err) {
+      console.error("error revoking access_token", err);
     }
+    clearSessionCookie(res);
+
+    res.redirect("/");
+  };
+
+  logoutSsoGet = (req: express.Request, res: express.Response) => {
+    const client = req.app.authClient;
+
+    clearSessionCookie(res);
+
+    const endSessionUrl = client!.endSessionUrl();
+    res.redirect(endSessionUrl);
   };
 }

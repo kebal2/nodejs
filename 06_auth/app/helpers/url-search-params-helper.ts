@@ -1,4 +1,4 @@
-import { CodeChallenge } from "../code-challenge";
+import { CodeChallenge } from "../auth/code-challenge";
 import { Config } from "./config";
 import { RouteHelper } from "./route-helper";
 

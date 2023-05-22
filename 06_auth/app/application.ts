@@ -1,12 +1,16 @@
 import express, { Application as ea } from "express";
 import { IApplication } from "./i.application";
+import { initialize, session } from "./auth/middleware";
+import cookieParser from "cookie-parser";
 
-
-function loggerMiddleware(request: express.Request, response: express.Response, next: any) {
+function loggerMiddleware(
+  request: express.Request,
+  response: express.Response,
+  next: any
+) {
   console.log(`${request.method} ${request.path}`);
   next();
 }
-
 
 export class Application implements IApplication {
   private app: ea;
@@ -16,11 +20,10 @@ export class Application implements IApplication {
   constructor(controllers: Array<any>);
   constructor(controllers: Array<any>, defaultRoute: string);
   constructor(controllers: Array<any>, defaultRoute?: string) {
-
     this.app = express();
 
     this.controllers = controllers;
-    this.defaultRoute = defaultRoute ?? '/';
+    this.defaultRoute = defaultRoute ?? "/";
 
     this.InitializeMiddleware();
     this.InitializeControllers();
@@ -35,7 +38,9 @@ export class Application implements IApplication {
   InitializeMiddleware() {
     this.app.use(express.json());
     this.app.use(loggerMiddleware);
-
+    this.app.use(cookieParser());
+    this.app.use(initialize);
+    this.app.use(session);
   }
 
   Start(port: number) {
